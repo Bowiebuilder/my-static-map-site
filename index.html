@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GeoMapper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    #map {
+      height: 400px;
+      margin-top: 1rem;
+    }
+    form {
+      display: flex;
+      gap: 1rem;
+    }
+    input {
+      flex: 1;
+      padding: 0.5rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Location Mapper</h1>
+  <p>Enter a location to see it on the map:</p>
+
+  <form id="locationForm">
+    <input type="text" id="locationInput" placeholder="e.g. Paris, France" required />
+    <button type="submit">Map it!</button>
+  </form>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([20, 0], 2); // Default global view
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const form = document.getElementById('locationForm');
+    const input = document.getElementById('locationInput');
+    let marker = null;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const location = input.value.trim();
+      if (!location) return;
+
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data && data[0]) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        // Center map and add marker
+        map.setView([lat, lon], 13);
+
+        if (marker) {
+          map.removeLayer(marker);
+        }
+
+        marker = L.marker([lat, lon]).addTo(map)
+          .bindPopup(`<b>${location}</b>`).openPopup();
+      } else {
+        alert("Location not found. Try something more specific.");
+      }
+    });
+  </script>
+
+</body>
+</html>
