@@ -2,87 +2,152 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GeoMapper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Leaflet CSS -->
+  <title>My First Golf Club</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     body {
-      font-family: sans-serif;
-      padding: 2rem;
-      max-width: 800px;
+      margin: 0;
+      font-family: 'Georgia', serif;
+      background: #fdf6f0;
+      color: #333;
+    }
+    header {
+      background: url('https://images.unsplash.com/photo-1526401485004-2fda9fbbd3b1?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
+      padding: 6rem 2rem;
+      text-align: center;
+      color: white;
+      position: relative;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+    header > * {
+      position: relative;
+      z-index: 1;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    header p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 1rem auto 2rem;
+    }
+    .button {
+      background: #8d6748;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    section {
+      padding: 4rem 2rem;
+      max-width: 1000px;
       margin: auto;
+    }
+    .form-preview, .map-preview, .gallery-preview {
+      margin-bottom: 3rem;
+    }
+    .form-preview p {
+      margin-bottom: 1rem;
     }
     #map {
       height: 400px;
-      margin-top: 1rem;
+      border-radius: 12px;
     }
-    form {
+    .gallery-cards {
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
     }
-    input {
-      flex: 1;
-      padding: 0.5rem;
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      flex: 1 1 calc(33% - 1rem);
     }
-    button {
-      padding: 0.5rem 1rem;
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    footer {
+      background: #eee;
+      padding: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
 
-  <h1>Location Mapper</h1>
-  <p>Enter a location to see it on the map:</p>
+  <header>
+    <h1>Mapped by Memories, United by Golf</h1>
+    <p>From first swings to dream courses — share your story and see how the world fell in love with the game.</p>
+    <a href="#submit" class="button">Pin Your First Swing</a>
+  </header>
 
-  <form id="locationForm">
-    <input type="text" id="locationInput" placeholder="e.g. Paris, France" required />
-    <button type="submit">Map it!</button>
-  </form>
+  <section class="form-preview" id="submit">
+    <h2>Submit Your Story</h2>
+    <p>Submit a childhood golf photo and tell us where it all began.</p>
+    <a href="#" class="button">Submit Your Story</a>
+  </section>
 
-  <div id="map"></div>
+  <section class="map-preview">
+    <h2>Explore Stories from Around the World</h2>
+    <div id="map"></div>
+  </section>
 
-  <!-- Leaflet JS -->
+  <section class="gallery-preview">
+    <h2>Recent Stories</h2>
+    <div class="gallery-cards">
+      <div class="card">
+        <img src="https://via.placeholder.com/300x200" alt="Golf Memory">
+        <strong>Emily R. – Dublin, Ireland</strong><br>
+        <em>Dream Course: Pebble Beach</em>
+        <p>"I remember sneaking onto the course with my dad and trying to copy his swing..."</p>
+      </div>
+      <div class="card">
+        <img src="https://via.placeholder.com/300x200" alt="Golf Memory">
+        <strong>Lucas B. – Toronto, Canada</strong><br>
+        <em>Dream Course: St Andrews</em>
+        <p>"My grandfather gave me my first set of clubs on my 8th birthday..."</p>
+      </div>
+      <div class="card">
+        <img src="https://via.placeholder.com/300x200" alt="Golf Memory">
+        <strong>Maya S. – Cape Town, South Africa</strong><br>
+        <em>Dream Course: Augusta National</em>
+        <p>"Our local club was just sand and scrub, but I fell in love with the game anyway..."</p>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top: 1rem;"><a href="#" class="button">Random Story</a></p>
+  </section>
+
+  <footer>
+    <p>My First Golf Club is a digital scrapbook of golf’s first swings — shared by players around the world.</p>
+    <p>&copy; 2025 My First Golf Club</p>
+  </footer>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Initialize the map
-    const map = L.map('map').setView([20, 0], 2); // Default global view
-
+    const map = L.map('map').setView([20, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const form = document.getElementById('locationForm');
-    const input = document.getElementById('locationInput');
-    let marker = null;
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const location = input.value.trim();
-      if (!location) return;
-
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (data && data[0]) {
-        const lat = data[0].lat;
-        const lon = data[0].lon;
-
-        // Center map and add marker
-        map.setView([lat, lon], 13);
-
-        if (marker) {
-          map.removeLayer(marker);
-        }
-
-        marker = L.marker([lat, lon]).addTo(map)
-          .bindPopup(`<b>${location}</b>`).openPopup();
-      } else {
-        alert("Location not found. Try something more specific.");
-      }
-    });
+    // Example marker
+    L.marker([53.3498, -6.2603]).addTo(map).bindPopup("Emily R. – Dublin, Ireland");
   </script>
 
 </body>
